@@ -4,11 +4,9 @@ services:
     runtime: node
     region: singapore
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: bun install && bun run build
+    startCommand: bun start
     autoDeploy: true
     envVars:
       - key: OPENAI_API_KEY
         sync: false
-      - key: NODE_VERSION
-        value: 20.0.0
