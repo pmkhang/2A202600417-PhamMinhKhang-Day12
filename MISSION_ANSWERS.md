@@ -356,3 +356,80 @@ Instances seen: {'instance-aaa'}
 - History vẫn đầy đủ 6 messages vì lưu trong Redis
 
 **Kết luận:** Stateless architecture cho phép scale ngang mà không mất session. Redis là single source of truth cho state.
+
+---
+
+## Task 6: Final Project
+
+### Cấu trúc project `06-lab-complete`
+
+```
+06-lab-complete/
+├── app/
+│   ├── main.py       # FastAPI app — tích hợp tất cả features
+│   └── config.py     # Settings từ env vars (12-factor)
+├── utils/
+│   └── mock_llm.py   # Mock LLM
+├── Dockerfile        # Multi-stage build
+├── docker-compose.yml
+├── .dockerignore
+├── .env.example
+├── requirements.txt
+├── render.yaml
+└── railway.toml
+```
+
+### Checklist tính năng
+
+| Tính năng | File | Ghi chú |
+|---|---|---|
+| Config từ env vars | `config.py` | Dataclass `Settings`, đọc từ `os.getenv` |
+| Structured JSON logging | `main.py` | `json.dumps({"event":...})` |
+| API key auth | `main.py` | `X-API-Key` header, `verify_api_key()` |
+| Rate limiting | `main.py` | Sliding window, 20 req/min |
+| Cost guard | `main.py` | Daily budget $5, reset mỗi ngày |
+| `/health` | `main.py` | Liveness probe, trả về uptime + checks |
+| `/ready` | `main.py` | Readiness probe, 503 khi chưa ready |
+| Graceful shutdown | `main.py` | `lifespan` + `SIGTERM` handler |
+| Dockerfile multi-stage | `Dockerfile` | builder + runtime, non-root user |
+| `docker-compose.yml` | root | agent + redis |
+| Deploy config | `render.yaml`, `railway.toml` | Cả hai đều có |
+
+### Kết quả test
+
+```bash
+GET /health
+{"status":"ok","version":"1.0.0","environment":"development","uptime_seconds":48.3,
+ "total_requests":1,"checks":{"llm":"mock"},"timestamp":"2026-04-17T10:16:15.750760+00:00"}
+
+GET /ready
+{"ready":true}
+
+POST /ask (no key) → HTTP 401
+{"detail":"Invalid or missing API key. Include header: X-API-Key: <key>"}
+
+POST /ask (valid key) → HTTP 200
+{"question":"what is docker?","answer":"Container là cách đóng gói app để chạy ở mọi nơi. Build once, run anywhere!",
+ "model":"gpt-4o-mini","timestamp":"2026-04-17T10:16:15.934620+00:00"}
+
+GET /metrics (valid key)
+{"uptime_seconds":48.5,"total_requests":5,"error_count":0,
+ "daily_cost_usd":0.0,"daily_budget_usd":5.0,"budget_used_pct":0.0}
+```
+
+### Kết quả `check_production_ready.py`
+
+```
+=======================================================
+  Production Readiness Check — Day 12 Lab
+=======================================================
+
+📁 Required Files      ✅ 6/6
+🔒 Security            ✅ 2/2
+🌐 API Endpoints       ✅ 6/6
+🐳 Docker              ✅ 6/6
+
+  Result: 20/20 checks passed (100%)
+  🎉 PRODUCTION READY! Deploy nào!
+=======================================================
+```
