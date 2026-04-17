@@ -47,13 +47,13 @@
       sendBtn.disabled = true;
 
       try {
-        const res = await fetch('/chat', {
+        const res = await fetch('/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
+          body: JSON.stringify({ question: text })
         });
         const data = await res.json();
-        addMsg(data.reply, 'bot');
+        addMsg(data.answer, 'bot');
       } catch {
         addMsg('Lỗi kết nối server.', 'bot');
       } finally {
