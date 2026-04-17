@@ -143,7 +143,7 @@ curl -X POST https://your-agent.railway.app/ask \
 
 ##  Pre-Submission Checklist
 
-- [ ] Repository is public (or instructor has access)
+- [x] Repository is public (or instructor has access)
 - [ ] `MISSION_ANSWERS.md` completed with all exercises
 - [ ] `DEPLOYMENT.md` has working public URL
 - [ ] All source code in `app/` directory
