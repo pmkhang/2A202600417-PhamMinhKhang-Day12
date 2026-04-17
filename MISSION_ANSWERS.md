@@ -103,3 +103,49 @@ Docker build theo từng layer và cache lại. Nếu `requirements.txt` không 
 | `nginx` | `nginx:alpine` | Reverse proxy, load balancer | Expose port 80/443 ra ngoài, forward vào `agent` |
 
 Tất cả service dùng chung network `internal` (bridge). Chỉ `nginx` expose port ra host. Agent không expose port trực tiếp → traffic phải đi qua Nginx.
+
+---
+
+## Task 3: Cloud Deployment
+
+### Nền tảng: Render
+
+### Public URL
+
+```
+https://ai-agent-rpsm.onrender.com/
+```
+
+### Các file cấu hình
+
+- `03-cloud-deployment/render/render.yaml` — Blueprint config
+- `03-cloud-deployment/render/app.py` — FastAPI app
+- `03-cloud-deployment/render/requirements.txt` — Dependencies
+- `03-cloud-deployment/render/utils/mock_llm.py` — Mock LLM
+
+### Biến môi trường đã cấu hình
+
+| Key | Giá trị | Cách set |
+|---|---|---|
+| `ENVIRONMENT` | `production` | render.yaml |
+| `PYTHON_VERSION` | `3.11.0` | render.yaml |
+| `OPENAI_API_KEY` | (set thủ công trên dashboard) | Dashboard |
+| `AGENT_API_KEY` | (Render tự sinh) | generateValue: true |
+
+### Lệnh test
+
+```bash
+# Health check
+curl https://ai-agent-rpsm.onrender.com/health
+
+# Ask endpoint
+curl -X POST https://ai-agent-rpsm.onrender.com/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "hello"}'
+```
+
+### Kết quả deploy thành công
+
+- Service `ai-agent` deploy thành công trên Render (region: Singapore)
+- Health check tại `/health` trả về `200 OK`
+- Public URL hoạt động: https://ai-agent-rpsm.onrender.com/

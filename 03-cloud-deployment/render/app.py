@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from utils.mock_llm import ask
 
@@ -21,14 +23,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 @app.get("/")
 def root():
-    return {
-        "message": "AI Agent running on Render!",
-        "docs": "/docs",
-        "health": "/health",
-    }
+    return FileResponse("static/index.html")
+
+
+@app.post("/chat")
+async def chat(request: Request):
+    body = await request.json()
+    message = body.get("message", "")
+    if not message:
+        raise HTTPException(422, "message required")
+    return {"reply": ask(message)}
 
 
 @app.post("/ask")
