@@ -4,7 +4,7 @@ services:
     runtime: node
     region: singapore
     plan: free
-    buildCommand: bun install && bun run build
+    buildCommand: ./build.sh
     startCommand: bun start
     autoDeploy: true
     envVars:
